@@ -1,18 +1,19 @@
 print("=== ANALISADOR DE TEXTO ===")
 
-texto = input("Digite um texto: ")
+linhas = []
 
-# Quantidade de caracteres
+for i in range(20):
+    texto = input(f"Digite a linha {i + 1} (Enter para terminar): ")
+    if texto == "":
+        break
+    linhas.append(texto)
+
+texto = " ".join(linhas)
+
 caracteres = len(texto)
-
-# Quantidade de palavras
 palavras = texto.split()
 quantidade_palavras = len(palavras)
-
-# Texto em maiúsculas
 maiusculo = texto.upper()
-
-# Texto em minúsculas
 minusculo = texto.lower()
 
 print("\n=== RESULTADO ===")
@@ -20,3 +21,4 @@ print(f"Quantidade de caracteres: {caracteres}")
 print(f"Quantidade de palavras: {quantidade_palavras}")
 print(f"Texto em maiúsculas: {maiusculo}")
 print(f"Texto em minúsculas: {minusculo}")
+
