@@ -1,0 +1,116 @@
+from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy.orm import Session
+
+from database import Base, engine, get_db
+from models import User
+from schemas import UserCreate, UserLogin
+from auth import hash_password, verify_password
+
+
+# Cria as tabelas no banco
+Base.metadata.create_all(bind=engine)
+
+
+app = FastAPI(
+    title="API de Login",
+    description="Sistema de cadastro e login com PostgreSQL",
+    version="1.0.0"
+)
+
+
+@app.get("/")
+def home():
+    return {
+        "message": "API funcionando!"
+    }
+
+
+# =========================
+# CADASTRO
+# =========================
+
+@app.post("/register")
+def register(
+    user: UserCreate,
+    db: Session = Depends(get_db)
+):
+
+    # Verifica se o email já existe
+    existing_user = (
+        db.query(User)
+        .filter(User.email == user.email)
+        .first()
+    )
+
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Email já cadastrado"
+        )
+
+    # Cria o usuário
+    new_user = User(
+        name=user.name,
+        email=user.email,
+        password=hash_password(user.password)
+    )
+
+    # Salva no banco
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return {
+        "message": "Usuário criado com sucesso!",
+        "user": {
+            "id": new_user.id,
+            "name": new_user.name,
+            "email": new_user.email
+        }
+    }
+
+
+# =========================
+# LOGIN
+# =========================
+
+@app.post("/login")
+def login(
+    user: UserLogin,
+    db: Session = Depends(get_db)
+):
+
+    # Procura o usuário pelo email
+    existing_user = (
+        db.query(User)
+        .filter(User.email == user.email)
+        .first()
+    )
+
+    # Usuário não encontrado
+    if not existing_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Email ou senha incorretos"
+        )
+
+    # Verifica a senha
+    password_correct = verify_password(
+        user.password,
+        existing_user.password
+    )
+
+    if not password_correct:
+        raise HTTPException(
+            status_code=401,
+            detail="Email ou senha incorretos"
+        )
+
+    return {
+        "message": "Login realizado com sucesso!",
+        "user": {
+            "id": existing_user.id,
+            "name": existing_user.name,
+            "email": existing_user.email
+        }
+    }
