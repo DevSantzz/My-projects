@@ -1,17 +1,24 @@
 import sqlite3
 import re
+import os
 from datetime import datetime
 
 NOME_BANCO = "cadastro.db"
 
 
+# ---------------------------------------------------------------------------
+# Camada de banco de dados
+# ---------------------------------------------------------------------------
+
 def conectar():
+    """Cria/abre a conexão com o banco de dados SQLite."""
     conexao = sqlite3.connect(NOME_BANCO)
     conexao.execute("PRAGMA foreign_keys = ON")
     return conexao
 
 
 def criar_tabela():
+    """Cria a tabela de usuários caso ela não exista."""
     with conectar() as conexao:
         conexao.execute(
             """
@@ -27,12 +34,16 @@ def criar_tabela():
         )
 
 
-def validar_email(email):
+# ---------------------------------------------------------------------------
+# Validações
+# ---------------------------------------------------------------------------
+
+def validar_email(email: str) -> bool:
     padrao = r"^[\w\.-]+@[\w\.-]+\.\w+$"
     return re.match(padrao, email) is not None
 
 
-def validar_idade(idade_str):
+def validar_idade(idade_str: str):
     if not idade_str.isdigit():
         return None
     idade = int(idade_str)
@@ -40,6 +51,10 @@ def validar_idade(idade_str):
         return idade
     return None
 
+
+# ---------------------------------------------------------------------------
+# Operações CRUD
+# ---------------------------------------------------------------------------
 
 def cadastrar_usuario():
     print("\n--- Cadastrar novo usuário ---")
@@ -232,6 +247,10 @@ def excluir_usuario():
         else:
             print("\nOperação cancelada.")
 
+
+# ---------------------------------------------------------------------------
+# Menu principal
+# ---------------------------------------------------------------------------
 
 def exibir_menu():
     print("\n" + "=" * 40)
