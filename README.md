@@ -56,7 +56,6 @@ Nome
 Idade
 E-mail
 
-O sistema também verifica se o e-mail informado possui um formato básico válido.
 
 🛠️ Tecnologias
 🐍 Python 3
